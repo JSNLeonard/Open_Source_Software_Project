@@ -11,8 +11,8 @@ const stepService = '00000001-0002-0003-0004-000000000000' // UUID of Step Count
 const stepCharacteristic = '00000001-0002-0003-0004-000000000004' // UUID for Characteristic of Step Count Service.
 const options = // New Const called Options for below data to be entered.
 {
-  port: 1883, // Port Number required to connect.
-  qos:0 // Quality of Service number.
+	port: 1883, // Port Number required to connect.
+	qos: 0 // Quality of Service number.
 }
 var mqttClient = mqtt.connect('mqtt://broker.mqttdashboard.com', options); // New variable to connect to MQTT.
 console.log("Starting MQTT Client on the Gateway Device in Order to Both Publish and Subscribe to Messages, to and from the HiveMQ Broker for the Year of 2022/23."); // Print statement to state it has started the MQTT Client on the Gateway Device.
@@ -25,22 +25,21 @@ function connectedToBrokerCallback() // New function for connecting to the broke
 	mqttClient.publish(topicToPublishTo, 'Reading Messages', publishCallback); // Publishes to MQTT that it's reading messages.
 }
 function subscribeCallback(error, granted) // Function for subscription call backs.
-{ 
-   	if (error) // If statement for error handling.
-   	{
+{
+	if (error) // If statement for error handling.
+	{
 		console.log("Error Subscribing to Topic."); // States if an error was found when subscribing to the topic.
-	} else
-	{	
+	} else {
 		console.log("Subscribed to Messages on Topic: ") // States if you were able to subscribe to messages on the topic.
-		for(var i=0; i<granted.length;i++) // For loop.
+		for (var i = 0; i < granted.length; i++) // For loop.
 		{
 			console.log(granted[i]); // Grants the i variable in the for loop.
 		}
-    	}
+	}
 }
 mqttClient.on('message', messageEventHandler);
 function messageEventHandler(topic, message, packet) // New function to handle the messages from MQTT, featuring the topic, message and packet.
-{ 
+{
 	console.log("Received Message '" + message + "' on the Topic '" + topic + "'"); // States when a message is received from MQTT.
 	if (message == 'on') // If statement when the message that is sent is called on.
 	{
@@ -54,31 +53,31 @@ function messageEventHandler(topic, message, packet) // New function to handle t
 	}
 }
 function publishCallback(error) // New function to publish step data.
-{     
-   	if (error) // If statement for errors.
-   	{
+{
+	if (error) // If statement for errors.
+	{
 		console.log("Error Publishing Data"); // States if an error is found when publishing data.
 	}
 	else // Else statement if above does not happen.
-	{	 
-        	console.log("Message is Published to Topic '" + topicToPublishTo + "'"); // States that a message has been published if an error was not found.
-    	}
+	{
+		console.log("Message is Published to Topic '" + topicToPublishTo + "'"); // States that a message has been published if an error was not found.
+	}
 }
 function publishCallbackStep(error) // New function to publish step data.
-{     
-   	if (error) // If statement for errors.
-   	{
+{
+	if (error) // If statement for errors.
+	{
 		console.log("Error Publishing Data"); // States if an error is found when publishing data.
 	}
 	else // Else statement if above does not happen.
-	{	 
-        	console.log("Message is Published to Topic '" + topicToPublishStep + "'"); // States that a message has been published if an error was not found.
-    	}
+	{
+		console.log("Message is Published to Topic '" + topicToPublishStep + "'"); // States that a message has been published if an error was not found.
+	}
 }
-const main = async() => // New const called main for the async function.
-{	
-	const {createBluetooth} = require('node-ble') // Const created for creationg of the bluetooth requiring node-ble.
-	const {bluetooth, destroy} = createBluetooth() // Const created for the creation of the bluetooth.
+const main = async () => // New const called main for the async function.
+{
+	const { createBluetooth } = require('node-ble') // Const created for creationg of the bluetooth requiring node-ble.
+	const { bluetooth, destroy } = createBluetooth() // Const created for the creation of the bluetooth.
 
 	// Get bluetooth adapter.
 	const adapter = await bluetooth.defaultAdapter() // Get an available Bluetooth adapter.
@@ -92,13 +91,13 @@ const main = async() => // New const called main for the async function.
 	console.log('Got Device Remote Name', deviceName) // Statement to state the device remote name.
 	console.log('Got Device User Friendly Name', await device.toString()) // Statement to get the user friendly name.
 	await adapter.stopDiscovery() // Stops the discovery.
-	
+
 	// Connect to the specific device.
 	await device.connect() // Connects to the specified device.
 	console.log("Connected to Device : " + deviceName) // Connects to the device name and states the name of the device.
 	const gattServer = await device.gatt() // New const for gattServer where it waits for the devices gatt.
 	services = await gattServer.services() // New variable called services where it awaits the gattServers services.
-	
+
 	while (device.connect) // While loop to run whilst the device is connected to MQTT.
 	{
 		const sleep = require("util").promisify(setTimeout); // Creates a new const called sleep to run the timeout below.
@@ -138,10 +137,12 @@ const main = async() => // New const called main for the async function.
 			const notifyChar = await primaryButton.getCharacteristic(buttonCharacteristic) // Creation of a new const for the charactertistics of the Button A Service.
 			console.log("Characteristic Flags Are: " + await notifyChar.getFlags()) // Print statement to show all of the Characteristic Flags of the Button A Service.
 			await notifyChar.startNotifications() // Starts the notifications to MQTT.
-			notifyChar.on('valuechanged', buffer => {console.log("Button Toggled, LED State Changed"); // Detects when a value changes on the buffer of the button and states a message when it occurs.
-			r.writeValue(Buffer.from([01])) // Writes a buffer value of 01 to change the LED to turn on.
-			mqttClient.publish(topicToPublishTo, "Button Toggled, LED State Changed", publishCallback); // Publishes data to MQTT and send a message stating, Button Toggled, LED State Changed.
-			r.catch((e) => console.log("There was an error", e))}); // Prints out there was an error if one was found during the promise rejection handle.
+			notifyChar.on('valuechanged', buffer => {
+				console.log("Button Toggled, LED State Changed"); // Detects when a value changes on the buffer of the button and states a message when it occurs.
+				r.writeValue(Buffer.from([01])) // Writes a buffer value of 01 to change the LED to turn on.
+				mqttClient.publish(topicToPublishTo, "Button Toggled, LED State Changed", publishCallback); // Publishes data to MQTT and send a message stating, Button Toggled, LED State Changed.
+				r.catch((e) => console.log("There was an error", e))
+			}); // Prints out there was an error if one was found during the promise rejection handle.
 		}
 	}
 }
